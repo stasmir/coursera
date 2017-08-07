@@ -87,6 +87,7 @@ public class Percolation {
     }
     
     public static void main(String[] args) {  // test client (optional)
+        StdOut.printf("Hello\n");
         new Percolation(2);
     }
 }
