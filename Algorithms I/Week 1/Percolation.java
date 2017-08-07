@@ -1,34 +1,20 @@
-/*---------------------------------------------------------
- *  Author:        Stanislav Mironovich
- *  Written:       8/6/2017
- *  Last updated:  8/6/2017
- *
- *  Compilation:   javac Percolation.java
- *  Execution:     java Percolation
- *  
- *  PercolationStat
- *
- *  % java Percolation
- *  Results
- * 
- *---------------------------------------------------------*/
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Percolation {
     private final int n;
     private final int count;
-    private final boolean[][] grid;
+    private final boolean[][] siteOpenStatuses;
     private final WeightedQuickUnionUF percolation;
     private int openCount = 0;
 
-    public Percolation(int n) {              // create n-by-n grid, with all sites blocked
+    public Percolation(int n) {              // create n-by-n siteOpenStatuses, with all sites blocked
         if (n <= 0)
             throw new IllegalArgumentException("n");
         
         this.n = n;
         count = n * n;
-        grid = new boolean[n][n];
+        siteOpenStatuses = new boolean[n][n];
         
         percolation = new WeightedQuickUnionUF(count + 2);
     }
@@ -41,25 +27,25 @@ public class Percolation {
         int i = row - 1;
         int j = col - 1;
 
-        grid[i][j] = true;
+        siteOpenStatuses[i][j] = true;
         openCount++;
 
         
         int index = i * n + j + 1;
         
-        if (i > 0 && grid[i - 1][j]) {
+        if (i > 0 && siteOpenStatuses[i - 1][j]) {
             percolation.union(index, index - n);
         }
 
-        if (i < n - 1 && grid[i + 1][j]) {
+        if (i < n - 1 && siteOpenStatuses[i + 1][j]) {
             percolation.union(index, index + n);
         }
 
-        if (j > 0 && grid[i][j - 1]) {
+        if (j > 0 && siteOpenStatuses[i][j - 1]) {
             percolation.union(index, index - 1);
         }
 
-        if (j < n - 1 && grid[i][j + 1]) {
+        if (j < n - 1 && siteOpenStatuses[i][j + 1]) {
             percolation.union(index, index + 1);
         }
         
@@ -74,7 +60,7 @@ public class Percolation {
     
     public boolean isOpen(int row, int col) { // is site (row, col) open?
         checkIndicies(row, col);
-        return grid[row - 1][col - 1];
+        return siteOpenStatuses[row - 1][col - 1];
     }
     
     public boolean isFull(int row, int col) { // is site (row, col) full?
