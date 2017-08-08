@@ -72,7 +72,7 @@ public class Percolation {
         }
 
         if (col < size && isOpen(row, col + 1)) {
-            int leftNeighborLinearCoordinate = siteLinearCoordinate - 1;
+            int leftNeighborLinearCoordinate = siteLinearCoordinate + 1;
 
             percolation.union(siteLinearCoordinate, leftNeighborLinearCoordinate);
             fullness.union(siteLinearCoordinate, leftNeighborLinearCoordinate);
