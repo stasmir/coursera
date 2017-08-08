@@ -1,93 +1,167 @@
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
-import edu.princeton.cs.algs4.StdOut;
 
+/**
+ * Class that allows to create a matrix then allows to open sites
+ * and then allows to determine percolation.
+ */
 public class Percolation {
-    private final int n;
-    private final int count;
-    private final boolean[][] siteOpenStatuses;
+    private final int size;
+    private final int sitesCount;
+    private final boolean[][] openSites;
     private final WeightedQuickUnionUF percolation;
-    private int openCount = 0;
+    private final WeightedQuickUnionUF fullness;
+    private int openSitesCount = 0;
+    private int topVirtualSiteLinearCoordinate = 0;
+    private int bottomVirtualSiteLinearCoordinate;
 
-    public Percolation(int n) {              // create n-by-n siteOpenStatuses, with all sites blocked
+    /**
+     * Determines whether a matrix of a size of n percolates
+     * @param n matrix size
+     */
+    public Percolation(int n) {
         if (n <= 0)
             throw new IllegalArgumentException("n");
         
-        this.n = n;
-        count = n * n;
-        siteOpenStatuses = new boolean[n][n];
-        
-        percolation = new WeightedQuickUnionUF(count + 2);
+        size = n;
+        openSites = new boolean[size][size];
+        sitesCount = size * size;
+        bottomVirtualSiteLinearCoordinate = sitesCount + 1;
+
+        percolation = new WeightedQuickUnionUF(sitesCount + 2); // + 2 virtual sites - top and bottom
+        fullness = new WeightedQuickUnionUF(sitesCount + 1); // + 1 virtual top site
     }
-       
-    public    void open(int row, int col) {   // open site (row, col) if it is not open already
+
+    /**
+     * Opens a site. If a site is already open then does nothing.
+     * Row and col are from 1 to n
+     * @param row site's row
+     * @param col site's col
+     */
+    public void open(int row, int col) {
+        checkIndicies(row, col);
+
         if (isOpen(row, col)) {
             return;
         }
 
-        int i = row - 1;
-        int j = col - 1;
-
-        siteOpenStatuses[i][j] = true;
-        openCount++;
+        openSites[row - 1][col - 1] = true;
+        openSitesCount++;
 
         
-        int index = i * n + j + 1;
+        int siteLinearCoordinate = convertMatrixToLinearCoordinate(row, col);
         
-        if (i > 0 && siteOpenStatuses[i - 1][j]) {
-            percolation.union(index, index - n);
+        if (row > 1 && isOpen(row - 1, col)) {
+            int topNeighborLinearCoordinate = siteLinearCoordinate - size;
+
+            percolation.union(siteLinearCoordinate, topNeighborLinearCoordinate);
+            fullness.union(siteLinearCoordinate, topNeighborLinearCoordinate);
         }
 
-        if (i < n - 1 && siteOpenStatuses[i + 1][j]) {
-            percolation.union(index, index + n);
+        if (row < size && isOpen(row + 1, col)) {
+            int bottomNeighborLinearCoordinate = siteLinearCoordinate + size;
+
+            percolation.union(siteLinearCoordinate, bottomNeighborLinearCoordinate);
+            fullness.union(siteLinearCoordinate, bottomNeighborLinearCoordinate);
         }
 
-        if (j > 0 && siteOpenStatuses[i][j - 1]) {
-            percolation.union(index, index - 1);
+        if (col > 1 && isOpen(row, col - 1)) {
+            int leftNeighborLinearCoordinate = siteLinearCoordinate - 1;
+
+            percolation.union(siteLinearCoordinate, leftNeighborLinearCoordinate);
+            fullness.union(siteLinearCoordinate, leftNeighborLinearCoordinate);
         }
 
-        if (j < n - 1 && siteOpenStatuses[i][j + 1]) {
-            percolation.union(index, index + 1);
+        if (col < size && isOpen(row, col + 1)) {
+            int leftNeighborLinearCoordinate = siteLinearCoordinate - 1;
+
+            percolation.union(siteLinearCoordinate, leftNeighborLinearCoordinate);
+            fullness.union(siteLinearCoordinate, leftNeighborLinearCoordinate);
         }
         
-        if (i == 0) {
-            percolation.union(0, index);
+        if (row == 1) {
+            percolation.union(siteLinearCoordinate, topVirtualSiteLinearCoordinate);
+            fullness.union(siteLinearCoordinate, topVirtualSiteLinearCoordinate);
         }
         
-        if (i == n - 1) {
-            percolation.union(count + 1, index);
+        if (row == size) {
+            percolation.union(bottomVirtualSiteLinearCoordinate, siteLinearCoordinate);
         }
     }
-    
-    public boolean isOpen(int row, int col) { // is site (row, col) open?
+
+    /**
+     * Determines whether a site is open or not
+     * Row and col are from 1 to n
+     * @param row site's row
+     * @param col site's col
+     * @return Is a site is open or not
+     */
+    public boolean isOpen(int row, int col) {
         checkIndicies(row, col);
-        return siteOpenStatuses[row - 1][col - 1];
+
+        return openSites[row - 1][col - 1];
     }
-    
-    public boolean isFull(int row, int col) { // is site (row, col) full?
+
+    /**
+     * Determines whether a site is full or not
+     * Row and col are from 1 to n
+     * @param row site's row
+     * @param col site's col
+     * @return Is a site is full or not
+     */
+    public boolean isFull(int row, int col) {
         checkIndicies(row, col);
-        return percolation.connected(0, n * (row-1) + col);           
+
+        return fullness.connected(
+                topVirtualSiteLinearCoordinate,
+                convertMatrixToLinearCoordinate(row, col));
     }
-    
-    public     int numberOfOpenSites() {      // number of open sites
-        return openCount;
+
+    /**
+     * Gets a number of open sites
+     * @return Number of open sites
+     */
+    public int numberOfOpenSites() {
+        return openSitesCount;
     }
-    
-    public boolean percolates() {             // does the system percolate? 
-        return percolation.connected(0, count + 1);
+
+    /**
+     * Determines whether a matrix percolates
+     * @return Percolates or not
+     */
+    public boolean percolates() {
+        return percolation.connected(
+                topVirtualSiteLinearCoordinate,
+                bottomVirtualSiteLinearCoordinate);
     }
-    
+
+    /**
+     * Check indices bounds. Throws if illegal
+     * Row and col are from 1 to n
+     * @param row Row coordinate
+     * @param col Col coordinate
+     */
     private void checkIndicies(int row, int col) {
-        if (row < 1 || row > n) {
+        if (row < 1 || row > size) {
             throw new IllegalArgumentException("row");
         }
 
-        if (col < 1 || col > n) {
+        if (col < 1 || col > size) {
             throw new IllegalArgumentException("col");
         }
     }
+
+    /**
+     * Converts row and col coordinates to linear coordinate.
+     * Linear coordinate (0) is for top virtual site and (sitesCount + 1) is for bottom virtual site
+     * Row and col are from 1 to n
+     * @param row Row coordinate
+     * @param col Col coordinate
+     * @return Linear coordinate
+     */
+    private int convertMatrixToLinearCoordinate(int row, int col) {
+        return size * (row - 1) + col;
+    }
     
-    public static void main(String[] args) {  // test client (optional)
-        StdOut.printf("Hello\n");
-        new Percolation(2);
+    public static void main(String[] args) {
     }
 }
