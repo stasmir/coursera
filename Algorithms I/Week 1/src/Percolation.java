@@ -6,13 +6,12 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
  */
 public class Percolation {
     private final int size;
-    private final int sitesCount;
     private final boolean[][] openSites;
     private final WeightedQuickUnionUF percolation;
     private final WeightedQuickUnionUF fullness;
     private int openSitesCount = 0;
-    private int topVirtualSiteLinearCoordinate = 0;
-    private int bottomVirtualSiteLinearCoordinate;
+    private final int topVirtualSiteLinearCoordinate = 0;
+    private final int bottomVirtualSiteLinearCoordinate;
 
     /**
      * Determines whether a matrix of a size of n percolates
@@ -24,7 +23,7 @@ public class Percolation {
         
         size = n;
         openSites = new boolean[size][size];
-        sitesCount = size * size;
+        int sitesCount = size * size;
         bottomVirtualSiteLinearCoordinate = sitesCount + 1;
 
         percolation = new WeightedQuickUnionUF(sitesCount + 2); // + 2 virtual sites - top and bottom
@@ -163,5 +162,6 @@ public class Percolation {
     }
     
     public static void main(String[] args) {
+        new Percolation(2);
     }
 }
