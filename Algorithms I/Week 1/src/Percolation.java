@@ -10,7 +10,7 @@ public class Percolation {
     private final WeightedQuickUnionUF percolation;
     private final WeightedQuickUnionUF fullness;
     private int openSitesCount = 0;
-    private final int topVirtualSiteLinearCoordinate = 0;
+    private static final int topVirtualSiteLinearCoordinate = 0;
     private final int bottomVirtualSiteLinearCoordinate;
 
     /**
@@ -162,6 +162,7 @@ public class Percolation {
     }
     
     public static void main(String[] args) {
-        new Percolation(2);
+        Percolation p = new Percolation(2);
+        p.isOpen(1, 1);
     }
 }
