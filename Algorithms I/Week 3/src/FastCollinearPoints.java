@@ -51,12 +51,12 @@ public class FastCollinearPoints {
             Point pivot = points[p];
 
             List<Point> collinear = new ArrayList<>();
-            double prevSlope = 0;
-
-            for (int i = 1; i < copyPoints.length; i++) {
-                double curSlope = pivot.slopeTo(copyPoints[i]);
-                if (collinear.isEmpty() || curSlope == prevSlope) {
-                    collinear.add(copyPoints[i]);
+            for (int i = 1; i < copyPoints.length - 1; i++) {
+                if (collinear.isEmpty() || pivot.slopeTo(copyPoints[i]) == pivot.slopeTo(copyPoints[i + 1])) {
+                    if (collinear.isEmpty()) {
+                        collinear.add(copyPoints[i]);
+                    }
+                    collinear.add(copyPoints[i + 1]);
                 } else {
                     if (collinear.size() > 2) {
                         collinear.add(pivot);
@@ -68,7 +68,6 @@ public class FastCollinearPoints {
                     }
                     collinear.clear();
                 }
-                prevSlope = curSlope;
             }
             if (collinear.size() > 2) {
                 collinear.add(pivot);
