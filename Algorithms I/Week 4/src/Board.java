@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.StdOut;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,9 +170,11 @@ public class Board {
         if (n != other.n)
             return false;
 
-        for (int i = 0; i < blocks.length; i++) {
-            if (blocks[i] != other.blocks[i]) {
-                return false;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (blocks[i][j] != other.blocks[i][j]) {
+                    return false;
+                }
             }
         }
 
@@ -246,6 +250,7 @@ public class Board {
         StringBuilder sb = new StringBuilder();
 
         sb.append(n);
+        sb.append('\n');
 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -261,6 +266,14 @@ public class Board {
      * Tests
      */
     public static void main(String[] args) {
+        int[][] blocks = new int[3][3];
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                blocks[i][j] = i * 3 + j + 1;
+        Board b1 = new Board(blocks);
+        Board b2 = new Board(blocks);
+
+        StdOut.print(b1.equals(b2));
 
     }
 }

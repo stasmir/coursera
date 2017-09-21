@@ -4,6 +4,7 @@ import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /******************************************************************************
  *  Compilation:  javac Solver.java
@@ -15,9 +16,24 @@ import java.util.List;
  *
  ******************************************************************************/
 public class Solver {
-    private int moves = 0;
-    private boolean solvable = true;
-    private final List<Board> solution = new ArrayList<>();
+    private SolveNode result;
+
+    private class SolveNode implements Comparable<SolveNode> {
+        private Board board;
+        private SolveNode previous;
+        private int moves;
+
+        public SolveNode(Board board, SolveNode prev) {
+            this.board = board;
+            this.previous = prev;
+            this.moves = prev == null ? 0 : prev.moves + 1;
+        }
+
+        public int compareTo(SolveNode other) {
+            return this.board.manhattan() + this.moves
+                    - other.board.manhattan() - other.moves;
+        }
+    }
 
     /**
      * Initializes a new solver.
@@ -29,27 +45,39 @@ public class Solver {
         if (initial == null)
             throw new IllegalArgumentException("initial");
 
-        if (initial.isGoal())
-            return;
+        MinPQ<SolveNode> pq = new MinPQ<>();
+        pq.insert(new SolveNode(initial, null));
 
-        Board searchNode = initial;
-        Board previous = null;
-        MinPQ pq = new MinPQ();
+        MinPQ<SolveNode> twinPq = new MinPQ<>();
+        pq.insert(new SolveNode(initial.twin(), null));
 
-        boolean solved = false;
-        do {
-
-            for (Board next : searchNode.neighbors()) {
-                if (!next.equals(previous))
-                    pq.insert(next);
+        while(true) {
+            if (pq.isEmpty() || twinPq.isEmpty()) {
+                return;
             }
 
-            previous = searchNode;
-            searchNode = (Board) pq.delMin();
+            SolveNode current = pq.delMin();
 
+            if (current.board.isGoal()) {
+                result = current;
+                return;
+            }
 
+            SolveNode twinCurrent = twinPq.delMin();
+            if (twinCurrent.board.isGoal()) {
+                return;
+            }
+
+            for (Board nextBoard : current.board.neighbors()) {
+                if (current.previous == null || !nextBoard.equals(current.previous.board))
+                    pq.insert(new SolveNode(nextBoard, current));
+            }
+
+            for (Board nextBoard : twinCurrent.board.neighbors()) {
+                if (twinCurrent.previous == null || !nextBoard.equals(twinCurrent.previous.board))
+                    twinPq.insert(new SolveNode(nextBoard, twinCurrent));
+            }
         }
-        while (!solved);
     }
 
     /**
@@ -58,7 +86,7 @@ public class Solver {
      * @return is the initial board solvable?
      */
     public boolean isSolvable() {
-        return solvable;
+        return result != null;
     }
 
     /**
@@ -67,7 +95,11 @@ public class Solver {
      * @return min number of moves to solve initial board; -1 if unsolvable
      */
     public int moves() {
-        return moves;
+        if (!isSolvable()) {
+            return -1;
+        }
+
+        return result.moves;
     }
 
     /**
@@ -76,6 +108,18 @@ public class Solver {
      * @return sequence of boards in a shortest solution; null if unsolvable
      */
     public Iterable<Board> solution() {
+        if (!isSolvable()) {
+            return null;
+        }
+
+        Stack<Board> solution = new Stack<>();
+        SolveNode cur = result;
+
+        while (cur != null) {
+            solution.push(cur.board);
+            cur = cur.previous;
+        }
+
         return solution;
     }
 
