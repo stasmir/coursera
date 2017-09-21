@@ -20,16 +20,17 @@ public class Solver {
         private Board board;
         private SolveNode previous;
         private int moves;
+        public int priority;
 
         public SolveNode(Board board, SolveNode prev) {
             this.board = board;
             this.previous = prev;
             this.moves = prev == null ? 0 : prev.moves + 1;
+            this.priority = board.manhattan() + this.moves;
         }
 
         public int compareTo(SolveNode other) {
-            return this.board.manhattan() + this.moves
-                    - other.board.manhattan() - other.moves;
+            return priority - other.priority;
         }
     }
 
