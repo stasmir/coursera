@@ -2,9 +2,7 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 /******************************************************************************
  *  Compilation:  javac Solver.java
@@ -49,7 +47,7 @@ public class Solver {
         pq.insert(new SolveNode(initial, null));
 
         MinPQ<SolveNode> twinPq = new MinPQ<>();
-        pq.insert(new SolveNode(initial.twin(), null));
+        twinPq.insert(new SolveNode(initial.twin(), null));
 
         while(true) {
             if (pq.isEmpty() || twinPq.isEmpty()) {
@@ -112,7 +110,7 @@ public class Solver {
             return null;
         }
 
-        Stack<Board> solution = new Stack<>();
+        Deque<Board> solution = new ArrayDeque<>();
         SolveNode cur = result;
 
         while (cur != null) {
@@ -128,7 +126,7 @@ public class Solver {
      */
     public static void main(String[] args) {
         // create initial board from file
-        In in = new In(args[0]);
+        In in = new In("tests/8puzzle/puzzle02.txt");
         int n = in.readInt();
         int[][] blocks = new int[n][n];
         for (int i = 0; i < n; i++)
